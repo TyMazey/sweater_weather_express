@@ -28,8 +28,39 @@ module.exports = (sequelize, DataTypes) => {
         password: bcrypt.hashSync(body.password, saltRounds),
         api_key: hat()
       })
+      return user
     }
-    return user
+    else {
+      var error = Error('Email or Password are incorrect.');
+      throw error
+    }
+  };
+
+  User.validateLogin = function(body) {
+    return new Promise(function (resolve, reject){
+      User.findOne({
+        where: {
+          email: body.email
+        }
+      })
+      .then(user => {
+        resolve(validatePassword(body, user))
+      })
+      .catch(error => {
+        reject(error);
+      });
+    })
+  };
+
+  function validatePassword(body, user) {
+    return new Promise(function (resolve, reject){
+      if (bcrypt.compareSync(body.password, user.password)) {
+        resolve(user);
+      }
+      else {
+        reject(error);
+      }
+    })
   };
 
   /* lat line */
