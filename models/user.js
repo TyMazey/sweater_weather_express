@@ -31,8 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       return user
     }
     else {
-      var error = Error('Email or Password are incorrect.');
-      throw error
+      reject()
     }
   };
 
