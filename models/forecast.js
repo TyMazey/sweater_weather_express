@@ -4,7 +4,7 @@ var fetch = require('node-fetch');
 
 
 
-module.exports = (citystate) => {
+module.exports = () => {
   const ForecastFacade = function(params){
     this.citystate = params
   };
@@ -22,12 +22,12 @@ module.exports = (citystate) => {
         fetchWeather(location.latitude, location.longitude);
       })
       .catch(error => {
-        fetchLocation(citystate);
+        fetchLocation(citystate, reject);
       });
     })
   };
 
-  function fetchLocation(citystate) {
+  function fetchLocation(citystate, reject) {
     var Location = require('../models').Location;
     fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${citystate}&key=AIzaSyBaqtLB9Q2wj1saLFU8W7AAtPf852nPg3E`)
     .then(function(response) {
@@ -35,7 +35,7 @@ module.exports = (citystate) => {
     })
     .then(function(jsonData) {
       var locationData = jsonData.results[0].geometry.location
-      var location = Location.create({
+      Location.create({
         citystate: citystate,
         latitude: locationData.lat,
         longitude: locationData.lng
@@ -44,14 +44,19 @@ module.exports = (citystate) => {
         fetchWeather(location.latitude, location.longitude)
       })
       .catch(error => {
-        reject(error);
+        return reject(error);
       });
     })
   };
 
   function fetchWeather(lat, lng) {
-    eval(pry.it)
-    fetch(`https://api.darksky.net/forecast/#{ENV['DARKSKY_KEY']}/${lat},${lng}`)
+    fetch(`https://api.darksky.net/forecast/b0d2ec981f7d8e69000e14dbf6f264c4/${lat},${lng}`)
+    .then(function(response){
+      return response.json();
+    })
+    .then(function(jsonData){
+      /*have json object with current weather data at this point*/
+    })
   };
 
 
