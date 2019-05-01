@@ -31,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       return user
     }
     else {
-      reject()
+      reject(error)
     }
   };
 
