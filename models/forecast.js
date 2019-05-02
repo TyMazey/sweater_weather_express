@@ -9,7 +9,9 @@ module.exports = () => {
     this.citystate = params
   };
 
-  ForecastFacade.prototype.getLocation = function(){
+  /* Instance Methods */
+
+  ForecastFacade.prototype.getForecast = function(){
     var Location = require('../models').Location;
     var citystate = this.citystate
     return new Promise(function(resolve, reject){
@@ -19,43 +21,58 @@ module.exports = () => {
         }
       })
       .then(location => {
-        fetchWeather(location.latitude, location.longitude);
+        fetchForecast(location.latitude, location.longitude)
+        .then(forecast => { resolve(forecast); })
+        .catch(error => { reject(error); })
       })
       .catch(error => {
-        fetchLocation(citystate, reject);
+        fetchLocation(citystate)
+        .then(forecast => { resolve(forecast); })
+        .then(error => { reject(error); })
       });
     })
   };
 
-  function fetchLocation(citystate, reject) {
+  /* Private Methods */
+
+  function fetchLocation(citystate) {
     var Location = require('../models').Location;
-    fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${citystate}&key=AIzaSyBaqtLB9Q2wj1saLFU8W7AAtPf852nPg3E`)
-    .then(function(response) {
-      return response.json();
-    })
-    .then(function(jsonData) {
-      var locationData = jsonData.results[0].geometry.location
-      Location.create({
-        citystate: citystate,
-        latitude: locationData.lat,
-        longitude: locationData.lng
+    return new Promise(function(resolve, reject){
+      fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${citystate}&key=${process.env.GOOGLE_KEY}`)
+      .then(function(response) {
+        return response.json();
       })
-      .then(location => {
-        fetchWeather(location.latitude, location.longitude)
+      .then(function(jsonData) {
+        var locationData = jsonData.results[0].geometry.location
+        Location.create({
+          citystate: citystate,
+          latitude: locationData.lat,
+          longitude: locationData.lng
+        })
+        .then(location => {
+          fetchForecast(location.latitude, location.longitude)
+          .then(forecast => { resolve(forecast); })
+          .catch(error => { reject(error); })
+        })
+        .catch(error => {
+          reject(error);
+        });
       })
-      .catch(error => {
-        return reject(error);
-      });
     })
   };
 
-  function fetchWeather(lat, lng) {
-    fetch(`https://api.darksky.net/forecast/b0d2ec981f7d8e69000e14dbf6f264c4/${lat},${lng}`)
-    .then(function(response){
-      return response.json();
-    })
-    .then(function(jsonData){
-      /*have json object with current weather data at this point*/
+  function fetchForecast(lat, lng) {
+    return new Promise(function(resolve, reject){
+      fetch(`https://api.darksky.net/forecast/${process.env.DARKSKY_KEY}/${lat},${lng}`)
+      .then(function(response){
+        return response.json();
+      })
+      .then(function(jsonData){
+        resolve(jsonData)
+      })
+      .catch(error => {
+        reject(error)
+      });
     })
   };
 
