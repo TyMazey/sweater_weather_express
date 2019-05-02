@@ -1,4 +1,4 @@
-class Forecast {
+export default class Forecast {
   constructor(location, weather) {
     this.location = location
     this.weather = weather

@@ -62,13 +62,16 @@ module.exports = () => {
   };
 
   function fetchForecast(lat, lng) {
+    var Forecast = require('./forecast')
     return new Promise(function(resolve, reject){
       fetch(`https://api.darksky.net/forecast/${process.env.DARKSKY_KEY}/${lat},${lng}`)
       .then(function(response){
         return response.json();
       })
       .then(function(jsonData){
-        resolve(jsonData)
+        var forecastData = new Forecast(this.citystate, jsonData)
+        forecastData.setForecast()
+        resolve(forecastData)
       })
       .catch(error => {
         reject(error)
