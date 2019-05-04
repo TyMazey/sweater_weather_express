@@ -11,9 +11,6 @@ module.exports = {
       UserId: {
         type: Sequelize.INTEGER
       },
-      LocationId: {
-        type: Sequelize.INTEGER
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

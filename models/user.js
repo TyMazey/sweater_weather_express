@@ -3,6 +3,8 @@ var bcrypt = require('bcrypt');
 var hat = require('hat');
 var saltRounds = 10;
 var pry = require('pryjs');
+var fetch = require('node-fetch');
+
 
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
@@ -59,7 +61,7 @@ module.exports = (sequelize, DataTypes) => {
       .then(user => {
         user.createFavorite(request.location)
         .then(message => { resolve(message) })
-        .catch(error => { reject('Something happen idk') })
+        .catch(error => { reject({status: 500, message: error}) })
       })
       .catch(error => {
         reject({
@@ -73,6 +75,8 @@ module.exports = (sequelize, DataTypes) => {
   User.prototype.createFavorite = function(location) {
     var Location = require('../models').Location;
     var Favorites = require('../models').Favorites;
+    var user = this
+    var location = location
     return new Promise(function (resolve, reject){
       Location.findOne({
         where: { citystate: location}
@@ -83,15 +87,48 @@ module.exports = (sequelize, DataTypes) => {
           LocationId: location.id
         })
         .then(favorite => {
-          eval(pry.it)
-          resolve(`${location} has been added to your favorites`)
+          resolve(`${location.citystate} has been added to your favorites`)
         })
         .catch(error => reject(error))
       })
       .catch(error => {
-        eval(pry.it)
-        //fetch a new location object
+        fetchLocation(location)
+        .then(location => {
+          Favorites.create({
+            UserId: user.id,
+            LocationId: location.id
+          })
+          .then(favorite => {
+            resolve(`${location.citystate} has been added to your favorites`)
+          })
+          .catch(error => reject(error));
+        })
+        .catch(error => reject(error))
       });
+    })
+  };
+
+  function fetchLocation(citystate) {
+    var Location = require('../models').Location;
+    return new Promise(function(resolve, reject){
+      fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${citystate}&key=${process.env.GOOGLE_KEY}`)
+      .then(function(response) {
+        return response.json();
+      })
+      .then(function(jsonData) {
+        var locationData = jsonData.results[0].geometry.location
+        Location.create({
+          citystate: citystate,
+          latitude: locationData.lat,
+          longitude: locationData.lng
+        })
+        .then(location => {
+          resolve(location);
+        })
+        .catch(error => {
+          reject(error);
+        });
+      })
     })
   };
 
