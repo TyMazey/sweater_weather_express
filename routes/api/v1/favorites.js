@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var pry = require('pryjs');
+var User = require('../../../models').User;
+
 
 /* POST create favorites */
 router.post('/', function(req, res, next) {
@@ -13,3 +15,5 @@ router.post('/', function(req, res, next) {
     res.status(error.status).send(JSON.stringify(error.message))
   });
 });
+
+module.exports = router;

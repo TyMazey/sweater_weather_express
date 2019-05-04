@@ -51,6 +51,23 @@ module.exports = (sequelize, DataTypes) => {
     })
   };
 
+  User.addFavorite = function(request) {
+    return new Promise(function (resolve, reject){
+      User.findOne({
+        where: { api_key: request.api_key }
+      })
+      .then(user => {
+        // user.createFavorite()
+      })
+      .catch(error => {
+        reject({
+          status: 500,
+          message: 'Unauthorized Request'
+        })
+      });
+    })
+  };
+
   function validatePassword(body, user) {
     return new Promise(function (resolve, reject){
       if (bcrypt.compareSync(body.password, user.password)) {
