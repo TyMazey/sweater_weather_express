@@ -58,6 +58,8 @@ module.exports = (sequelize, DataTypes) => {
       })
       .then(user => {
         user.createFavorite(request.location)
+        .then(message => { resolve(message) })
+        .catch(error => { reject('Something happen idk') })
       })
       .catch(error => {
         reject({
@@ -69,20 +71,28 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   User.prototype.createFavorite = function(location) {
-    var Location = require('./location').Location;
-    var Favorites = require('./favorites').Favorites;
-    Location.findOne({
-      where: { citystate: location}
-    })
-    .then(location => {
-      Favorites.create({
-        UserId: this.id,
-        LocationId: location.id
+    var Location = require('../models').Location;
+    var Favorites = require('../models').Favorites;
+    return new Promise(function (resolve, reject){
+      Location.findOne({
+        where: { citystate: location}
       })
+      .then(location => {
+        Favorites.create({
+          UserId: this.id,
+          LocationId: location.id
+        })
+        .then(favorite => {
+          eval(pry.it)
+          resolve(`${location} has been added to your favorites`)
+        })
+        .catch(error => reject(error))
+      })
+      .catch(error => {
+        eval(pry.it)
+        //fetch a new location object
+      });
     })
-    .catch(error => {
-      //fetch a new location object
-    });
   };
 
   function validatePassword(body, user) {
