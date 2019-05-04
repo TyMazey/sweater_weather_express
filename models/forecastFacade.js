@@ -77,7 +77,5 @@ module.exports = () => {
       });
     })
   };
-
-
   return ForecastFacade
 };
