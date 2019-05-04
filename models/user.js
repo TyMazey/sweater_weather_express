@@ -57,15 +57,32 @@ module.exports = (sequelize, DataTypes) => {
         where: { api_key: request.api_key }
       })
       .then(user => {
-        // user.createFavorite()
+        user.createFavorite(request.location)
       })
       .catch(error => {
         reject({
-          status: 500,
+          status: 401,
           message: 'Unauthorized Request'
         })
       });
     })
+  };
+
+  User.prototype.createFavorite = function(location) {
+    var Location = require('./location').Location;
+    var Favorites = require('./favorites').Favorites;
+    Location.findOne({
+      where: { citystate: location}
+    })
+    .then(location => {
+      Favorites.create({
+        UserId: this.id,
+        LocationId: location.id
+      })
+    })
+    .catch(error => {
+      //fetch a new location object
+    });
   };
 
   function validatePassword(body, user) {
