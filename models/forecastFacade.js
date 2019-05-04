@@ -21,7 +21,7 @@ module.exports = () => {
         }
       })
       .then(location => {
-        fetchForecast(location.latitude, location.longitude)
+        fetchForecast(citystate, location.latitude, location.longitude)
         .then(forecast => { resolve(forecast); })
         .catch(error => { reject(error); })
       })
@@ -50,7 +50,7 @@ module.exports = () => {
           longitude: locationData.lng
         })
         .then(location => {
-          fetchForecast(location.latitude, location.longitude)
+          fetchForecast(location.citystate, location.latitude, location.longitude)
           .then(forecast => { resolve(forecast); })
           .catch(error => { reject(error); })
         })
@@ -61,16 +61,15 @@ module.exports = () => {
     })
   };
 
-  function fetchForecast(lat, lng) {
-    var Forecast = require('./forecast')
+  function fetchForecast(citystate, lat, lng) {
+    var Forecast = require('../pojos/forecast')
     return new Promise(function(resolve, reject){
       fetch(`https://api.darksky.net/forecast/${process.env.DARKSKY_KEY}/${lat},${lng}`)
       .then(function(response){
         return response.json();
       })
       .then(function(jsonData){
-        var forecastData = new Forecast(this.citystate, jsonData)
-        forecastData.setForecast()
+        var forecastData = new Forecast(citystate, jsonData)
         resolve(forecastData)
       })
       .catch(error => {
