@@ -91,6 +91,38 @@ module.exports = (sequelize, DataTypes) => {
     })
   };
 
+  User.getFavorites = function(request) {
+    return new Promise(function (resolve, reject){
+      User.findOne({
+        where: { api_key: request.api_key }
+      })
+      .then(user => {
+        user.listFavorites()
+        .then(favorites => { resolve(favorites) })
+        .catch(error => { reject({status: 500, message: error})})
+      })
+      .catch(error => {
+        reject({
+          status: 401,
+          message: 'Unauthorized Request'
+        })
+      });
+    })
+  };
+
+  User.prototype.listFavorites = function() {
+    var Favorites = require('../models').Favorites;
+    var ForecastFacade = require('../models').ForecastFacade;
+    var user = this;
+    return new Promise(function (resolve, reject){
+      Favorites.getLocations(user.id)
+      .then(favorites => {
+
+      })
+      .catch(error => { reject(error) });
+    })
+  };
+
   User.prototype.deleteFavorite = function(location) {
     var Location = require('../models').Location;
     var Favorites = require('../models').Favorites;
