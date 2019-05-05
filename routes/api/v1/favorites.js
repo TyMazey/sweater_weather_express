@@ -21,7 +21,7 @@ router.get('/', function(req, res, next) {
   User.getFavorites(req.body)
   .then(favorites => {
     res.setHeader('Content-Type', 'application/json');
-    res.status(204).send(favorites);
+    res.status(200).send(favorites);
   })
   .catch(error => {
     res.status(error.status).send(JSON.stringify(error.message));

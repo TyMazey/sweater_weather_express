@@ -117,7 +117,7 @@ module.exports = (sequelize, DataTypes) => {
     return new Promise(function (resolve, reject){
       Favorites.getLocations(user.id)
       .then(favorites => {
-
+        resolve(favorites);
       })
       .catch(error => { reject(error) });
     })

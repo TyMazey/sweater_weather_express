@@ -1,4 +1,6 @@
 'use strict';
+var pry = require('pryjs');
+
 module.exports = (sequelize, DataTypes) => {
   const Favorites = sequelize.define('Favorites', {
     UserId: DataTypes.INTEGER,
@@ -8,25 +10,52 @@ module.exports = (sequelize, DataTypes) => {
     Favorites.belongsTo(models.Location)
   };
 
-  Favorites.getLocation = function(userid){
+  Favorites.getLocations = function(userid){
     var Favorites = this
     var Location = require('../models').Location;
-    var ForecastFacade = require('../models').ForecastFacade;
     return new Promise(function (resolve, reject){
-      this.findAll({
+      Favorites.findAll({
         where: {UserId: userid}
       })
       .then(favorites => {
-        Location.findAll({
-          where: { id: favorites }
-        })
+        locationArray(favorites)
         .then(locations => {
-          var locationForecast = {};
-
+          forecastArray(locations)
+          .then(forecast => {
+            resolve(forecast) })
+          .catch(error => {})
         })
-        .catch(error => { reject(error) });
+        .catch(error => {});
       })
-      .catch(error => { reject(error) });
+    })
+  };
+
+  function locationArray(favorites){
+    var Location = require('../models').Location;
+    return new Promise(function (resolve, reject){
+      var locationArray = [];
+      for (let i = 0; i < favorites.length; i++){
+        let l = Location.findOne({
+          where: { id: favorites[i].LocationId }
+        })
+        locationArray.push(l)
+      }
+      resolve(Promise.all(locationArray))
+    })
+  };
+
+  function forecastArray(locations){
+    var ForecastFacade = require('../models').ForecastFacade;
+    return new Promise(function (resolve, reject){
+      var locationForecastArray = [];
+      for (let i = 0; i < locations.length; i++){
+        var facade = new ForecastFacade(locations[i].citystate)
+        let f = facade.getForecast()
+        delete f.hourly;
+        delete f.daily;
+        locationForecastArray.push(f)
+      }
+      resolve(Promise.all(locationForecastArray))
     })
   };
   return Favorites;
