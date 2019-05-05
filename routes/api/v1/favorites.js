@@ -18,7 +18,14 @@ router.post('/', function(req, res, next) {
 
 /* GET favorite locations*/
 router.get('/', function(req, res, next) {
-  // User.getFavorites(req.body)
+  User.getFavorites(req.body)
+  .then(favorites => {
+    res.setHeader('Content-Type', 'application/json');
+    res.status(204).send(favorites);
+  })
+  .catch(error => {
+    res.status(error.status).send(JSON.stringify(error.message));
+  });
 });
 
 /* DELETE favorite location */
