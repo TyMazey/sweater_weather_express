@@ -16,4 +16,21 @@ router.post('/', function(req, res, next) {
   });
 });
 
+/* GET favorite locations*/
+router.get('/', function(req, res, next) {
+  // User.getFavorites(req.body)
+});
+
+/* DELETE favorite location */
+router.delete('/', function(req, res, next) {
+  User.removeFavorite(req.body)
+  .then(success => {
+    res.setHeader('Content-Type', 'application/json');
+    res.status(204).send();
+  })
+  .catch(error => {
+    res.status(error.status).send(JSON.stringify(error.message));
+  });
+});
+
 module.exports = router;
